@@ -3,7 +3,7 @@ let currentTrack = 0;
 let audio = new Audio();
 
 async function loadTracks() {
-  const res = await fetch("http://localhost:3000/tracks");
+  const res = await fetch("https://repo-1-exw5.onrender.com/tracks");
   tracks = await res.json();
 
   const list = document.querySelector(".list");
@@ -25,7 +25,7 @@ async function playTrack(index) {
 
   // получаем ссылку на аудио
   const res = await fetch(
-    `http://localhost:3000/audio/${track.file_id}`
+    `https://repo-1-exw5.onrender.com/audio/${track.file_id}`
   );
   const data = await res.json();
 

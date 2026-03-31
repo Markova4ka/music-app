@@ -3,7 +3,7 @@ const axios = require("axios");
 const fs = require("fs");
 
 const TOKEN = "8703415232:AAG7GH_U3qw9uV9ZLgKKn1UovuOZD-Dnr6Q";
-const API = "http://localhost:3000/tracks";
+const API = "https://repo-1-exw5.onrender.com/tracks";
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
