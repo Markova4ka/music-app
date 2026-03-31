@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Music App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <header>
+      <h1>🎵 Music Hub</h1>
+      <p>твоя музыка в одном месте</p>
+    </header>
+
+    <section>
+      <h2>🔥 Топ треков</h2>
+
+      <div class="list">
+        <div class="track">1. Night Drive</div>
+        <div class="track">2. Lost in Tokyo</div>
+        <div class="track">3. Neon Dreams</div>
+      </div>
+    </section>
+
+    <section>
+  <h2>🎧 Плеер</h2>
+
+  <div class="player">
+
+    <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
+
+    <div class="info">
+      <div class="author">Neon Artist</div>
+      <div class="title" id="trackTitle">Night Drive</div>
+    </div>
+
+    <div class="controls">
+      <button onclick="prevTrack()">⏮</button>
+      <button onclick="togglePlay()" id="playBtn">▶️</button>
+      <button onclick="nextTrack()">⏭</button>
+    </div>
+
+  </div>
+</section>
+
+    <section>
+      <h2>🎮 Игры</h2>
+
+      <div class="card" onclick="startQuiz()">
+        <h3>Угадай песню</h3>
+        <p>по началу трека</p>
+      </div>
+
+    </section>
+
+    <footer>
+      <p>made for music lovers 🎧</p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
