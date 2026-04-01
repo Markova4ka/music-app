@@ -18,33 +18,30 @@
     <section>
       <h2>🔥 Топ треков</h2>
 
-      <div class="list">
-        <div class="track">1. Night Drive</div>
-        <div class="track">2. Lost in Tokyo</div>
-        <div class="track">3. Neon Dreams</div>
-      </div>
+      <!-- 🔥 ВАЖНО: сюда JS будет рендерить -->
+      <div class="list" id="tracks"></div>
     </section>
 
     <section>
-  <h2>🎧 Плеер</h2>
+      <h2>🎧 Плеер</h2>
 
-  <div class="player">
+      <div class="player">
 
-    <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
+        <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
 
-    <div class="info">
-      <div class="author">Neon Artist</div>
-      <div class="title" id="trackTitle">Night Drive</div>
-    </div>
+        <div class="info">
+          <div class="author">Neon Artist</div>
+          <div class="title" id="trackTitle">Выбери трек</div>
+        </div>
 
-    <div class="controls">
-      <button onclick="prevTrack()">⏮</button>
-      <button onclick="togglePlay()" id="playBtn">▶️</button>
-      <button onclick="nextTrack()">⏭</button>
-    </div>
+        <div class="controls">
+          <button onclick="prevTrack()">⏮️</button>
+          <button onclick="togglePlay()" id="playBtn">▶️</button>
+          <button onclick="nextTrack()">⏭️</button>
+        </div>
 
-  </div>
-</section>
+      </div>
+    </section>
 
     <section>
       <h2>🎮 Игры</h2>
