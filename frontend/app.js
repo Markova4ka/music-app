@@ -2,14 +2,16 @@ let tracks = [];
 let currentTrack = 0;
 let audio = new Audio();
 
+// 👉 один BASE URL (очень важно)
+const API = "https://music-app-gfga.onrender.com";
+
 await wakeServer();
 loadTracks();
 
 async function wakeServer() {
   try {
-    await fetch("https://repo-1-exw5.onrender.com/ping");
+    await fetch(`${API}/ping`);
   } catch (e) {}
-  
 }
 
 async function loadTracks() {
@@ -21,14 +23,14 @@ async function loadTracks() {
 
   while (tries < 10) {
     try {
-      const res = await fetch("https://repo-1-exw5.onrender.com/tracks");
+      const res = await fetch(`${API}/tracks`);
       const data = await res.json();
 
-      if (data && data.length >= 0) {
+      if (data) {
+        tracks = data; // 🔥 ВАЖНО (у тебя этого не было)
         renderTracks(data);
         return;
       }
-
     } catch (e) {}
 
     tries++;
@@ -43,23 +45,20 @@ async function playTrack(index) {
 
   const track = tracks[index];
 
-  // получаем ссылку на аудио
-  const res = await fetch(
-    `https://repo-1-exw5.onrender.com/audio/${track.file_id}`
-  );
+  const res = await fetch(`${API}/audio/${track.file_id}`);
   const data = await res.json();
 
   audio.src = data.url;
   audio.play();
 
   document.getElementById("trackTitle").innerText = track.title;
-  document.getElementById("playBtn").innerText = "⏸";
+  document.getElementById("playBtn").innerText = "⏸️";
 }
 
 function togglePlay() {
   if (audio.paused) {
     audio.play();
-    document.getElementById("playBtn").innerText = "⏸";
+    document.getElementById("playBtn").innerText = "⏸️";
   } else {
     audio.pause();
     document.getElementById("playBtn").innerText = "▶️";
