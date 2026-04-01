@@ -5,37 +5,50 @@ const axios = require("axios");
 const path = require("path");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "frontend")));
 
-const FILE = "./tracks.json";
-const TOKEN = "8703415232:AAG7GH_U3qw9uV9ZLgKKn1UovuOZD-Dnr6Q";
+// ✅ безопасный путь к файлу
+const FILE = path.join(__dirname, "tracks.json");
 
-// получить все треки
+// ✅ берём токен из Environment Variables (Render)
+const TOKEN = process.env.BOT_TOKEN;
+
+// ======================
+// GET ALL TRACKS
+// ======================
 app.get("/tracks", (req, res) => {
   try {
-    const data = fs.readFileSync(FILE);
+    const data = fs.readFileSync(FILE, "utf-8");
     res.json(JSON.parse(data));
-  } catch {
+  } catch (e) {
     res.json([]);
   }
 });
 
-// добавить трек
+// ======================
+// ADD TRACK
+// ======================
 app.post("/add-track", (req, res) => {
   let data = [];
+
   try {
-    data = JSON.parse(fs.readFileSync(FILE));
-  } catch {}
+    const fileData = fs.readFileSync(FILE, "utf-8");
+    data = JSON.parse(fileData);
+  } catch (e) {}
 
   data.push(req.body);
+
   fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 
   res.json({ ok: true });
 });
 
-// получить ссылку на аудио
+// ======================
+// GET TELEGRAM AUDIO URL
+// ======================
 app.get("/audio/:file_id", async (req, res) => {
   try {
     const file_id = req.params.file_id;
@@ -45,28 +58,41 @@ app.get("/audio/:file_id", async (req, res) => {
     );
 
     const file_path = fileRes.data.result.file_path;
+
     const url = `https://api.telegram.org/file/bot${TOKEN}/${file_path}`;
 
     res.json({ url });
 
   } catch (e) {
+    console.error(e);
     res.status(500).json({ error: "Ошибка получения файла" });
   }
 });
 
+// ======================
+// HEALTH CHECK
+// ======================
 app.get("/ping", (req, res) => {
   res.send("ok");
 });
 
-// пинг чтобы сервер не спал
+// ======================
+// KEEP ALIVE LOG (НЕ ДЕРЖИТ СЕРВЕР ЖИВЫМ, ТОЛЬКО ЛОГ)
+// ======================
 setInterval(() => {
   console.log("ping...");
 }, 300000);
 
+// ======================
+// START SERVER
+// ======================
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Server started on port " + PORT);
+  console.log("Server started on port", PORT);
 });
 
+// ======================
+// START BOT (same process)
+// ======================
 require("./bot");
