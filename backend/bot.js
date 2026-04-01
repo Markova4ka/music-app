@@ -1,53 +1,114 @@
-const TelegramBot = require("node-telegram-bot-api");
-const axios = require("axios");
 const fs = require("fs");
+const path = require("path");
+const TelegramBot = require("node-telegram-bot-api");
 
-const TOKEN = "8703415232:AAG7GH_U3qw9uV9ZLgKKn1UovuOZD-Dnr6Q";
-const API = "https://repo-1-exw5.onrender.com/tracks";
+const TOKEN = process.env.BOT_TOKEN;
+const CHANNEL_ID = process.env.CHANNEL_ID; // например @your_channel
+
+const FILE = path.join(__dirname, "tracks.json");
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
-// проверка дубликатов
-function exists(file_id, list) {
-  return list.some(t => t.file_id === file_id);
+// --------------------
+// загрузка базы
+// --------------------
+function loadTracks() {
+  try {
+    return JSON.parse(fs.readFileSync(FILE, "utf-8"));
+  } catch {
+    return [];
+  }
 }
 
-// загрузка из канала при старте
-async function syncChannel() {
-  console.log("Синхронизация канала...");
-
-  const res = await axios.get(API);
-  const existing = res.data;
-
-  // Telegram НЕ даёт полный список постов напрямую,
-  // но мы можем ловить новые + предотвращать дубли
-  console.log("Готово (будут добавляться новые посты)");
+// --------------------
+// сохранение базы
+// --------------------
+function saveTracks(data) {
+  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 }
 
-syncChannel();
+// --------------------
+// добавление трека с защитой от дублей
+// --------------------
+function addTrack(track) {
+  const data = loadTracks();
 
-// ловим новые посты
+  const exists = data.find(t => t.file_id === track.file_id);
+
+  if (!exists) {
+    data.push(track);
+    saveTracks(data);
+    console.log("➕ Новый трек добавлен:", track.title);
+  } else {
+    console.log("⚠️ Дубликат пропущен");
+  }
+}
+
+// --------------------
+// старт бота
+// --------------------
+bot.onText(/\/start/, (msg) => {
+  bot.sendMessage(msg.chat.id, "🎵 Бот музыки работает!");
+});
+
+// --------------------
+// обработка новых сообщений канала
+// --------------------
 bot.on("channel_post", async (msg) => {
-  if (msg.audio) {
+  try {
+    if (!msg.audio && !msg.document) return;
+
+    const file = msg.audio || msg.document;
+
     const track = {
-      id: Date.now().toString(),
-      title: msg.audio.title || "Без названия",
-      file_id: msg.audio.file_id
+      title: file.title || "Без названия",
+      file_id: file.file_id,
+      duration: file.duration || 0,
+      date: msg.date
     };
 
-    try {
-      await fetch("https://repo-1-exw5.onrender.com/tracks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(track)
-      });
+    addTrack(track);
 
-      console.log("✅ Трек добавлен");
-
-    } catch (e) {
-      console.log("❌ Ошибка добавления");
-    }
+  } catch (e) {
+    console.log("Ошибка обработки:", e);
   }
 });
+
+// --------------------
+// ОДНОРАЗОВАЯ загрузка старых сообщений
+// --------------------
+let initialized = false;
+
+async function loadHistory() {
+  if (initialized) return;
+  initialized = true;
+
+  try {
+    console.log("📥 Загружаем старые посты...");
+
+    const updates = await bot.getUpdates();
+
+    updates.forEach(u => {
+      const msg = u.channel_post;
+      if (!msg || (!msg.audio && !msg.document)) return;
+
+      const file = msg.audio || msg.document;
+
+      addTrack({
+        title: file.title || "Без названия",
+        file_id: file.file_id,
+        duration: file.duration || 0,
+        date: msg.date
+      });
+    });
+
+    console.log("✅ История загружена");
+  } catch (e) {
+    console.log("Ошибка истории:", e);
+  }
+}
+
+// запускаем историю один раз
+loadHistory();
+
+console.log("🤖 Bot started...");
