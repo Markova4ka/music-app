@@ -108,7 +108,8 @@ async function loadHistory() {
   }
 }
 
+console.log("TOKEN =", process.env.BOT_TOKEN);
+
 // запускаем историю один раз
 loadHistory();
-
 console.log("🤖 Bot started...");
