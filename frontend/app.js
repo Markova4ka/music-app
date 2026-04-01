@@ -26,15 +26,25 @@ async function loadTracks() {
 
   try {
     const res = await fetch(API + "/tracks");
-    const data = await res.json();
 
-    console.log("TRACKS:", data);
+    const text = await res.text();
+    console.log("RAW RESPONSE:", text);
 
-    tracks = data || [];
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.log("❌ НЕ JSON ОТ СЕРВЕРА");
+      container.innerHTML = "❌ Сервер вернул не JSON";
+      return;
+    }
+
+    tracks = data;
     renderTracks(tracks);
 
   } catch (e) {
-    console.log("LOAD ERROR:", e);
+    console.log("FETCH ERROR:", e);
     container.innerHTML = "❌ Ошибка загрузки";
   }
 }
