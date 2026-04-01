@@ -9,16 +9,21 @@ start();
 async function start() {
   await wakeServer();
   await loadTracks();
+
+  // 🔥 авто-плей первого трека (если есть)
+  if (tracks.length) {
+    playTrack(0);
+  }
 }
 
-// 🔥 пробуждение сервера
+// 🔥 wake server
 async function wakeServer() {
   try {
     await fetch(API + "/ping");
   } catch (e) {}
 }
 
-// 📥 загрузка треков
+// 📥 load tracks
 async function loadTracks() {
   const container = document.getElementById("tracks");
 
@@ -27,20 +32,13 @@ async function loadTracks() {
   try {
     const res = await fetch(API + "/tracks");
 
-    console.log("STATUS:", res.status);
-    console.log("OK:", res.ok);
-
-    const text = await res.text();
-    console.log("RAW RESPONSE:", text);
-
     if (!res.ok) {
       container.innerHTML = "❌ HTTP ERROR";
       return;
     }
 
-    const data = JSON.parse(text);
+    tracks = await res.json();
 
-    tracks = data;
     renderTracks(tracks);
 
   } catch (e) {
@@ -49,7 +47,7 @@ async function loadTracks() {
   }
 }
 
-// 🎨 рендер списка
+// 🎨 render
 function renderTracks(data) {
   const container = document.getElementById("tracks");
 
@@ -81,10 +79,12 @@ async function playTrack(index) {
 
   try {
     const res = await fetch(API + "/audio/" + track.file_id);
+
     const data = await res.json();
 
     audio.src = data.url;
-    await audio.play().catch(e => console.log("PLAY ERROR:", e));
+
+    await audio.play();
 
     document.getElementById("trackTitle").innerText =
       track.title || "Без названия";
@@ -110,6 +110,7 @@ function togglePlay() {
 // ⏭ next
 function nextTrack() {
   if (!tracks.length) return;
+
   currentTrack = (currentTrack + 1) % tracks.length;
   playTrack(currentTrack);
 }
@@ -117,6 +118,7 @@ function nextTrack() {
 // ⏮ prev
 function prevTrack() {
   if (!tracks.length) return;
+
   currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
   playTrack(currentTrack);
 }

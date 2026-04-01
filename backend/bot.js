@@ -65,6 +65,6 @@ module.exports = { handleUpdate };
 // =====================
 // webhook setup
 // =====================
-bot.setWebHook(${WEBHOOK_URL}/webhook);
+bot.setWebHook(`${WEBHOOK_URL}/webhook`);
 
-console.log("🌐 Webhook set:", ${WEBHOOK_URL}/webhook);
+console.log("🌐 Webhook set:", `${WEBHOOK_URL}/webhook`);
