@@ -3,15 +3,27 @@ const path = require("path");
 const TelegramBot = require("node-telegram-bot-api");
 
 const TOKEN = process.env.BOT_TOKEN;
-const CHANNEL_ID = process.env.CHANNEL_ID; // например @your_channel
+const CHANNEL_ID = process.env.CHANNEL_ID;
 
 const FILE = path.join(__dirname, "tracks.json");
 
+// =====================
+// защита от двойного запуска
+// =====================
+if (global.botStarted) {
+  console.log("⚠️ Bot already running, skip instance");
+  return;
+}
+global.botStarted = true;
+
+// =====================
+// запуск бота (polling)
+// =====================
 const bot = new TelegramBot(TOKEN, { polling: true });
 
-// --------------------
+// =====================
 // загрузка базы
-// --------------------
+// =====================
 function loadTracks() {
   try {
     return JSON.parse(fs.readFileSync(FILE, "utf-8"));
@@ -20,16 +32,16 @@ function loadTracks() {
   }
 }
 
-// --------------------
+// =====================
 // сохранение базы
-// --------------------
+// =====================
 function saveTracks(data) {
   fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 }
 
-// --------------------
-// добавление трека с защитой от дублей
-// --------------------
+// =====================
+// добавление трека
+// =====================
 function addTrack(track) {
   const data = loadTracks();
 
@@ -38,22 +50,22 @@ function addTrack(track) {
   if (!exists) {
     data.push(track);
     saveTracks(data);
-    console.log("➕ Новый трек добавлен:", track.title);
+    console.log("➕ Новый трек:", track.title);
   } else {
     console.log("⚠️ Дубликат пропущен");
   }
 }
 
-// --------------------
-// старт бота
-// --------------------
+// =====================
+// /start
+// =====================
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id, "🎵 Бот музыки работает!");
 });
 
-// --------------------
-// обработка новых сообщений канала
-// --------------------
+// =====================
+// новые посты из канала
+// =====================
 bot.on("channel_post", async (msg) => {
   try {
     if (!msg.audio && !msg.document) return;
@@ -70,46 +82,11 @@ bot.on("channel_post", async (msg) => {
     addTrack(track);
 
   } catch (e) {
-    console.log("Ошибка обработки:", e);
+    console.log("Ошибка channel_post:", e);
   }
 });
 
-// --------------------
-// ОДНОРАЗОВАЯ загрузка старых сообщений
-// --------------------
-let initialized = false;
-
-async function loadHistory() {
-  if (initialized) return;
-  initialized = true;
-
-  try {
-    console.log("📥 Загружаем старые посты...");
-
-    const updates = await bot.getUpdates();
-
-    updates.forEach(u => {
-      const msg = u.channel_post;
-      if (!msg || (!msg.audio && !msg.document)) return;
-
-      const file = msg.audio || msg.document;
-
-      addTrack({
-        title: file.title || "Без названия",
-        file_id: file.file_id,
-        duration: file.duration || 0,
-        date: msg.date
-      });
-    });
-
-    console.log("✅ История загружена");
-  } catch (e) {
-    console.log("Ошибка истории:", e);
-  }
-}
-
-console.log("TOKEN =", process.env.BOT_TOKEN);
-
-// запускаем историю один раз
-loadHistory();
+// =====================
+// лог запуска
+// =====================
 console.log("🤖 Bot started...");
