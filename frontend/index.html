@@ -21,23 +21,43 @@
 
       <div class="player">
 
-        <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
+  <!-- 🖼 COVER -->
+  <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
 
-        <div class="info">
-          <div class="author">—</div>
-          <div class="title" id="trackTitle">Нажми Play</div>
-        </div>
+  <!-- 🎵 INFO -->
+  <div class="info">
+    <div class="title" id="trackTitle">Нажми Play</div>
+    <div class="author" id="trackAuthor">—</div>
+  </div>
 
-        <div class="controls">
-          <button onclick="prevTrack()">⏮️</button>
-          <button onclick="togglePlay()" id="playBtn">▶️</button>
-          <button onclick="nextTrack()">⏭️</button>
-        </div>
+  <!-- ⏱ PROGRESS -->
+  <div class="progress-wrap">
 
-        <!-- ⏱ таймер (обязательно) -->
-        <div id="time">0:00 / 0:00</div>
+    <span id="currentTime">0:00</span>
 
-      </div>
+    <div class="progress-bar" onclick="seek(event)">
+      <div class="progress" id="progress"></div>
+      <div class="dot" id="dot"></div>
+    </div>
+
+    <span id="duration">0:00</span>
+
+  </div>
+
+  <!-- 🎮 CONTROLS -->
+  <div class="controls">
+
+    <button class="btn" onclick="prevTrack()">⏮</button>
+
+    <button class="btn play" onclick="togglePlay()" id="playBtn">
+      ▶
+    </button>
+
+    <button class="btn" onclick="nextTrack()">⏭</button>
+
+  </div>
+
+</div>
     </section>
 
     <!-- 🎮 ИГРЫ -->

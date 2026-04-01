@@ -9,6 +9,9 @@ start();
 async function start() {
   await wakeServer();
   await loadTracks();
+
+  // 🔥 autoplay random при старте (если хочешь убери)
+  // playRandom();
 }
 
 // 🔥 wake server
@@ -18,7 +21,7 @@ async function wakeServer() {
   } catch (e) {}
 }
 
-// 📥 load tracks (НО НЕ РЕНДЕРИМ СПИСОК)
+// 📥 load tracks
 async function loadTracks() {
   try {
     const res = await fetch(API + "/tracks");
@@ -28,7 +31,7 @@ async function loadTracks() {
   }
 }
 
-// 🎲 RANDOM TRACK
+// 🎲 random track
 function getRandomTrack() {
   if (!tracks.length) return null;
 
@@ -38,11 +41,16 @@ function getRandomTrack() {
   return tracks[index];
 }
 
-// ▶️ PLAY RANDOM
+// ▶️ play random
 async function playRandom() {
   const track = getRandomTrack();
   if (!track) return;
 
+  await playTrack(track);
+}
+
+// ▶️ play specific track
+async function playTrack(track) {
   try {
     const res = await fetch(API + "/audio/" + track.file_id);
     const data = await res.json();
@@ -50,17 +58,17 @@ async function playRandom() {
     audio.src = data.url;
     await audio.play();
 
-    showNowPlaying(track);
+    updateUI(track);
 
   } catch (e) {
     console.log("PLAY ERROR:", e);
   }
 }
 
-// 🎧 show current track
-function showNowPlaying(track) {
+// 🎧 UI update
+function updateUI(track) {
   document.getElementById("trackTitle").innerText =
-    "🎧 Сейчас играет: " + (track.title || "Без названия");
+    track.title || "Без названия";
 
   document.getElementById("trackAuthor").innerText =
     track.performer || "Unknown";
@@ -80,35 +88,64 @@ function togglePlay() {
   }
 }
 
-// ⏭ next random
+// ⏭ next (random)
 function nextTrack() {
   playRandom();
 }
 
+// ⏮ prev (тоже random, можно улучшить позже)
+function prevTrack() {
+  playRandom();
+}
+
 // =====================
-// ⏱ TIMER / PROGRESS
+// ⏱ PROGRESS BAR
 // =====================
 audio.addEventListener("timeupdate", () => {
   const current = audio.currentTime;
   const duration = audio.duration || 0;
 
-  document.getElementById("time").innerText =
-    formatTime(current) + " / " + formatTime(duration);
+  const percent = duration ? (current / duration) * 100 : 0;
 
-  const percent = (current / duration) * 100;
-  document.getElementById("progress").style.width = percent + "%";
+  // 📊 bar
+  const progress = document.getElementById("progress");
+  if (progress) progress.style.width = percent + "%";
+
+  // 🎯 dot
+  const dot = document.getElementById("dot");
+  if (dot) dot.style.left = percent + "%";
+
+  // ⏱ time
+  const currentTime = document.getElementById("currentTime");
+  const durationTime = document.getElementById("duration");
+
+  if (currentTime) currentTime.innerText = formatTime(current);
+  if (durationTime) durationTime.innerText = formatTime(duration);
 });
 
+// 🔥 seek (клик по прогрессу)
+function seek(event) {
+  const bar = event.currentTarget;
+  const rect = bar.getBoundingClientRect();
+
+  const percent = (event.clientX - rect.left) / rect.width;
+
+  if (audio.duration) {
+    audio.currentTime = percent * audio.duration;
+  }
+}
+
+// 🔥 autoplay next
+audio.addEventListener("ended", () => {
+  playRandom();
+});
+
+// ⏱ format time
 function formatTime(sec) {
-  if (!sec) return "0:00";
+  if (!sec || isNaN(sec)) return "0:00";
 
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60);
 
   return m + ":" + (s < 10 ? "0" + s : s);
 }
-
-// 🔥 autoplay next when ended
-audio.addEventListener("ended", () => {
-  playRandom();
-});
