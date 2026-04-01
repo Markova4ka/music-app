@@ -9,9 +9,6 @@ start();
 async function start() {
   await wakeServer();
   await loadTracks();
-
-  // 🔥 autoplay random при старте (если хочешь убери)
-  // playRandom();
 }
 
 // 🔥 wake server
@@ -41,7 +38,7 @@ function getRandomTrack() {
   return tracks[index];
 }
 
-// ▶️ play random
+// ▶️ play random track
 async function playRandom() {
   const track = getRandomTrack();
   if (!track) return;
@@ -49,7 +46,7 @@ async function playRandom() {
   await playTrack(track);
 }
 
-// ▶️ play specific track
+// ▶️ play selected track
 async function playTrack(track) {
   try {
     const res = await fetch(API + "/audio/" + track.file_id);
@@ -65,7 +62,7 @@ async function playTrack(track) {
   }
 }
 
-// 🎧 UI update
+// 🎧 update UI
 function updateUI(track) {
   document.getElementById("trackTitle").innerText =
     track.title || "Без названия";
@@ -74,7 +71,7 @@ function updateUI(track) {
     track.performer || "Unknown";
 }
 
-// ⏯ toggle
+// ▶️ / ⏸ toggle
 function togglePlay() {
   if (!audio.src) {
     playRandom();
@@ -88,18 +85,18 @@ function togglePlay() {
   }
 }
 
-// ⏭ next (random)
+// ⏭ next
 function nextTrack() {
   playRandom();
 }
 
-// ⏮ prev (тоже random, можно улучшить позже)
+// ⏮ prev (пока random)
 function prevTrack() {
   playRandom();
 }
 
 // =====================
-// ⏱ PROGRESS BAR
+// ⏱ PROGRESS BAR + TIMER
 // =====================
 audio.addEventListener("timeupdate", () => {
   const current = audio.currentTime;
@@ -107,7 +104,7 @@ audio.addEventListener("timeupdate", () => {
 
   const percent = duration ? (current / duration) * 100 : 0;
 
-  // 📊 bar
+  // 📊 progress line
   const progress = document.getElementById("progress");
   if (progress) progress.style.width = percent + "%";
 
@@ -115,7 +112,7 @@ audio.addEventListener("timeupdate", () => {
   const dot = document.getElementById("dot");
   if (dot) dot.style.left = percent + "%";
 
-  // ⏱ time
+  // ⏱ time text
   const currentTime = document.getElementById("currentTime");
   const durationTime = document.getElementById("duration");
 
@@ -123,7 +120,7 @@ audio.addEventListener("timeupdate", () => {
   if (durationTime) durationTime.innerText = formatTime(duration);
 });
 
-// 🔥 seek (клик по прогрессу)
+// 🎯 seek (перемотка)
 function seek(event) {
   const bar = event.currentTarget;
   const rect = bar.getBoundingClientRect();

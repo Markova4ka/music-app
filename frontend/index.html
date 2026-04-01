@@ -10,57 +10,58 @@
 
   <div class="app">
 
+    <!-- HEADER -->
     <header>
       <h1>🎵 Music Hub</h1>
       <p>твоя музыка в одном месте</p>
     </header>
 
-    <!-- 🎧 ПЛЕЕР -->
+    <!-- 🎧 PLAYER -->
     <section>
       <h2>🎧 Плеер</h2>
 
       <div class="player">
 
-  <!-- 🖼 COVER -->
-  <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
+        <!-- 🖼 COVER -->
+        <img class="cover" src="https://i.imgur.com/8Km9tLL.jpg" />
 
-  <!-- 🎵 INFO -->
-  <div class="info">
-    <div class="title" id="trackTitle">Нажми Play</div>
-    <div class="author" id="trackAuthor">—</div>
-  </div>
+        <!-- 🎵 INFO -->
+        <div class="info">
+          <div class="title" id="trackTitle">Нажми Play</div>
+          <div class="author" id="trackAuthor">—</div>
+        </div>
 
-  <!-- ⏱ PROGRESS -->
-  <div class="progress-wrap">
+        <!-- ⏱ PROGRESS -->
+        <div class="progress-wrap">
 
-    <span id="currentTime">0:00</span>
+          <span id="currentTime">0:00</span>
 
-    <div class="progress-bar" onclick="seek(event)">
-      <div class="progress" id="progress"></div>
-      <div class="dot" id="dot"></div>
-    </div>
+          <div class="progress-bar" onclick="seek(event)">
+            <div class="progress" id="progress"></div>
+            <div class="dot" id="dot"></div>
+          </div>
 
-    <span id="duration">0:00</span>
+          <span id="duration">0:00</span>
 
-  </div>
+        </div>
 
-  <!-- 🎮 CONTROLS -->
-  <div class="controls">
+        <!-- 🎮 CONTROLS -->
+        <div class="controls">
 
-    <button class="btn" onclick="prevTrack()">⏮</button>
+          <button class="btn" onclick="prevTrack()">⏮️</button>
 
-    <button class="btn play" onclick="togglePlay()" id="playBtn">
-      ▶
-    </button>
+          <button class="btn play" onclick="togglePlay()" id="playBtn">
+            ▶️
+          </button>
 
-    <button class="btn" onclick="nextTrack()">⏭</button>
+          <button class="btn" onclick="nextTrack()">⏭️</button>
 
-  </div>
+        </div>
 
-</div>
+      </div>
     </section>
 
-    <!-- 🎮 ИГРЫ -->
+    <!-- 🎮 GAME -->
     <section>
       <h2>🎮 Игры</h2>
 
@@ -71,27 +72,30 @@
 
     </section>
 
+    <!-- FOOTER -->
     <footer>
       <p>made for music lovers 🎧</p>
+
+      <!-- 🔥 SOCIALS -->
+      <div class="socials">
+
+        <a href="https://t.me/kotanki" target="_blank" class="social tg">
+          Telegram
+        </a>
+
+        <a href="https://www.tiktok.com/@kotanki?_r=1&_t=ZT-95Be8nSAaD7" target="_blank" class="social tt">
+          TikTok
+        </a>
+
+        <a href="https://youtube.com/@kotanki_x9y?si=iqyY_EuDYuB359bo" target="_blank" class="social yt">
+          YouTube
+        </a>
+
+      </div>
+
     </footer>
 
   </div>
-
-  <div class="socials">
-
-  <a href="https://t.me/kotanki" target="_blank" class="social tg">
-    Telegram
-  </a>
-
-  <a href="https://www.tiktok.com/@kotanki?_r=1&_t=ZT-95Be8nSAaD7" target="_blank" class="social tt">
-    TikTok
-  </a>
-
-  <a href="https://youtube.com/@kotanki_x9y?si=iqyY_EuDYuB359bo" target="_blank" class="social yt">
-    YouTube
-  </a>
-
-</div>
 
   <script src="app.js"></script>
 </body>
