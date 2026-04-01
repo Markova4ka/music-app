@@ -39,6 +39,7 @@ app.post("/add-track", (req, res) => {
 // webhook endpoint
 // =====================
 app.post("/webhook", (req, res) => {
+  console.log("📩 WEBHOOK:", req.body); // 👈 ВАЖНО
   require("./bot").handleUpdate(req.body);
   res.sendStatus(200);
 });
