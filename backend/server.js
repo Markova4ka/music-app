@@ -1,55 +1,46 @@
-const express = require("express");
-const cors = require("cors");
-const fs = require("fs");
+const TelegramBot = require("node-telegram-bot-api");
 
-const app = express();
+const TOKEN = process.env.BOT_TOKEN;
 
-app.use(cors({ origin: "*" }));
-app.use(express.json());
-
-const FILE = "./tracks.json";
+// ❗ ВАЖНО: webhook режим (НЕ polling)
+const bot = new TelegramBot(TOKEN);
 
 // -------------------
-// load/save
+// WEBHOOK ROUTE (ЭТОГО У ТЕБЯ НЕ ХВАТАЛО)
 // -------------------
-function loadTracks() {
+app.post("/webhook", (req, res) => {
   try {
-    return JSON.parse(fs.readFileSync(FILE, "utf-8"));
-  } catch {
-    return [];
+    console.log("🔥 webhook received");
+
+    const update = req.body;
+
+    const msg = update.channel_post;
+    if (!msg) return res.sendStatus(200);
+
+    const file = msg.audio || msg.document;
+
+    if (!file) return res.sendStatus(200);
+
+    const tracks = loadTracks();
+
+    const track = {
+      title: file.title || "Без названия",
+      file_id: file.file_id,
+      duration: file.duration || 0,
+      date: msg.date
+    };
+
+    const exists = tracks.find(t => t.file_id === track.file_id);
+
+    if (!exists) {
+      tracks.push(track);
+      saveTracks(tracks);
+      console.log("➕ NEW TRACK:", track.title);
+    }
+
+    res.sendStatus(200);
+  } catch (e) {
+    console.log("WEBHOOK ERROR:", e);
+    res.sendStatus(200);
   }
-}
-
-function saveTracks(data) {
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-}
-
-// -------------------
-app.get("/ping", (req, res) => {
-  res.send("pong");
-});
-
-// -------------------
-app.get("/tracks", (req, res) => {
-  res.json(loadTracks());
-});
-
-// -------------------
-app.post("/addTrack", (req, res) => {
-  const tracks = loadTracks();
-
-  tracks.push(req.body);
-
-  saveTracks(tracks);
-
-  console.log("➕ track saved:", req.body);
-
-  res.json({ ok: true });
-});
-
-// -------------------
-const PORT = process.env.PORT || 10000;
-
-app.listen(PORT, () => {
-  console.log("Server started on", PORT);
 });
