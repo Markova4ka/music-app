@@ -2,11 +2,12 @@ const express = require("express");
 const fs = require("fs");
 const cors = require("cors");
 const axios = require("axios");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static("../frontend"));
+app.use(express.static(path.join(__dirname, "frontend")));
 
 const FILE = "./tracks.json";
 const TOKEN = "8703415232:AAG7GH_U3qw9uV9ZLgKKn1UovuOZD-Dnr6Q";
@@ -62,6 +63,8 @@ setInterval(() => {
   console.log("ping...");
 }, 300000);
 
-app.listen(3000, () => {
-  console.log("Server started");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server started on port " + PORT);
 });
