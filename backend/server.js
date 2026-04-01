@@ -10,7 +10,7 @@ app.use(express.json());
 const FILE = "./tracks.json";
 
 // -------------------
-// load/save
+// load / save
 // -------------------
 function loadTracks() {
   try {
@@ -39,17 +39,49 @@ app.get("/tracks", (req, res) => {
 });
 
 // -------------------
-// webhook (Telegram будет сюда слать)
+// webhook Telegram
 // -------------------
 app.post("/webhook", (req, res) => {
-  console.log("🔥 webhook received:", req.body);
+  const update = req.body;
+
+  // Telegram может прислать либо message, либо channel_post
+  const msg = update.message || update.channel_post;
+
+  if (!msg) return res.sendStatus(200);
+
+  // пытаемся найти музыку
+  const audio =
+    msg.audio ||
+    msg.voice ||
+    msg.document ||
+    msg.video;
+
+  // ❌ если нет медиа — игнорируем (это текстовый пост)
+  if (!audio) return res.sendStatus(200);
+
+  // ❌ фильтр: если это документ, но не музыка (по mime)
+  if (audio.mime_type && !audio.mime_type.startsWith("audio") && !audio.mime_type.startsWith("video")) {
+    return res.sendStatus(200);
+  }
+
+  const track = {
+    title: audio.title || audio.file_name || "Unknown",
+    performer: audio.performer || "Unknown",
+    file_id: audio.file_id,
+    type: audio.mime_type || "unknown",
+    date: msg.date
+  };
 
   const tracks = loadTracks();
 
-  // пример: просто сохраняем всё что пришло
-  tracks.push(req.body);
+  // защита от дублей
+  const exists = tracks.find(t => t.file_id === track.file_id);
+  if (!exists) {
+    tracks.push(track);
+    saveTracks(tracks);
 
-  saveTracks(tracks);
+    console.log("🎵 saved track:", track);
+  }
 
   res.sendStatus(200);
 });
