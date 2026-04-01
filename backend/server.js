@@ -1,51 +1,64 @@
 const express = require("express");
+const cors = require("cors");
 const fs = require("fs");
-const path = require("path");
 
 const app = express();
 
+// 🔥 ВАЖНО: CORS (фикс твоей ошибки)
+app.use(cors({
+  origin: "*"
+}));
+
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "frontend")));
 
-const FILE = path.join(__dirname, "tracks.json");
+// -------------------
+// 📌 ТВОИ ДАННЫЕ
+// -------------------
+let tracks = [];
 
-// =====================
-// tracks API
-// =====================
-app.get("/tracks", (req, res) => {
-  try {
-    const data = fs.readFileSync(FILE, "utf-8");
-    res.json(JSON.parse(data));
-  } catch {
-    res.json([]);
-  }
+// -------------------
+// 📌 PING (проверка сервера)
+// -------------------
+app.get("/ping", (req, res) => {
+  res.send("pong");
 });
 
-app.post("/add-track", (req, res) => {
-  let data = [];
+// -------------------
+// 📌 ПОЛУЧИТЬ ТРЕКИ
+// -------------------
+app.get("/tracks", (req, res) => {
+  res.json(tracks);
+});
 
-  try {
-    data = JSON.parse(fs.readFileSync(FILE, "utf-8"));
-  } catch {}
+// -------------------
+// 📌 ДОБАВИТЬ ТРЕК (из бота)
+// -------------------
+app.post("/addTrack", (req, res) => {
+  const track = req.body;
 
-  data.push(req.body);
+  tracks.push(track);
 
-  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+  console.log("➕ Добавлен трек:", track);
 
   res.json({ ok: true });
 });
 
-// =====================
-// webhook endpoint
-// =====================
-app.post("/webhook", (req, res) => {
-  console.log("📩 WEBHOOK:", req.body); // 👈 ВАЖНО
-  require("./bot").handleUpdate(req.body);
-  res.sendStatus(200);
+// -------------------
+// 📌 ПОЛУЧИТЬ АУДИО (пример)
+// -------------------
+app.get("/audio/:file_id", (req, res) => {
+  const file_id = req.params.file_id;
+
+  // тут у тебя должна быть логика получения ссылки
+  res.json({
+    url: `https://example.com/audio/${file_id}.mp3`
+  });
 });
 
-// =====================
-const PORT = process.env.PORT || 3000;
+// -------------------
+// 📌 СТАРТ СЕРВЕРА
+// -------------------
+const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
   console.log("Server started on port", PORT);
