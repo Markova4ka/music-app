@@ -107,3 +107,41 @@ footer {
   margin-left: 5px;
   cursor: pointer;
 }
+
+.socials {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.social {
+  padding: 10px 14px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.social:hover {
+  transform: scale(1.05);
+}
+
+/* Telegram */
+.tg {
+  background: #229ED9;
+}
+
+/* TikTok */
+.tt {
+  background: #000;
+  border: 1px solid #333;
+}
+
+/* YouTube */
+.yt {
+  background: #FF0000;
+}
