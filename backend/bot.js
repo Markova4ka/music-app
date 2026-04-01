@@ -3,18 +3,14 @@ const path = require("path");
 const TelegramBot = require("node-telegram-bot-api");
 
 const TOKEN = process.env.BOT_TOKEN;
-const CHANNEL_ID = process.env.CHANNEL_ID;
-
-// 👉 URL ВПИСАН ВРУЧНУЮ
 const WEBHOOK_URL = "https://music-app-gfga.onrender.com";
 
 const FILE = path.join(__dirname, "tracks.json");
 
-// ❌ НИКАКОГО polling
 const bot = new TelegramBot(TOKEN);
 
 // =====================
-// база
+// load / save
 // =====================
 function loadTracks() {
   try {
@@ -41,16 +37,16 @@ function addTrack(track) {
 }
 
 // =====================
-// webhook обработка
+// webhook handler
 // =====================
 function handleUpdate(update) {
   try {
     const msg = update.channel_post;
     if (!msg) return;
 
-    if (!msg.audio && !msg.document) return;
-
     const file = msg.audio || msg.document;
+
+    if (!file) return;
 
     addTrack({
       title: file.title || "Без названия",
@@ -64,12 +60,11 @@ function handleUpdate(update) {
   }
 }
 
-// =====================
 module.exports = { handleUpdate };
 
 // =====================
-// авто установка webhook
+// webhook setup
 // =====================
-bot.setWebHook(`${WEBHOOK_URL}/webhook`);
+bot.setWebHook(${WEBHOOK_URL}/webhook);
 
-console.log("🌐 Webhook set:", `${WEBHOOK_URL}/webhook`);
+console.log("🌐 Webhook set:", ${WEBHOOK_URL}/webhook);
