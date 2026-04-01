@@ -27,24 +27,24 @@ async function loadTracks() {
   try {
     const res = await fetch(API + "/tracks");
 
+    console.log("STATUS:", res.status);
+    console.log("OK:", res.ok);
+
     const text = await res.text();
     console.log("RAW RESPONSE:", text);
 
-    let data;
-
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      console.log("❌ НЕ JSON ОТ СЕРВЕРА");
-      container.innerHTML = "❌ Сервер вернул не JSON";
+    if (!res.ok) {
+      container.innerHTML = "❌ HTTP ERROR";
       return;
     }
+
+    const data = JSON.parse(text);
 
     tracks = data;
     renderTracks(tracks);
 
   } catch (e) {
-    console.log("FETCH ERROR:", e);
+    console.log("FETCH FAILED:", e);
     container.innerHTML = "❌ Ошибка загрузки";
   }
 }
