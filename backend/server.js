@@ -1,46 +1,62 @@
-const TelegramBot = require("node-telegram-bot-api");
+const express = require("express");
+const cors = require("cors");
+const fs = require("fs");
 
-const TOKEN = process.env.BOT_TOKEN;
+const app = express();
 
-// ❗ ВАЖНО: webhook режим (НЕ polling)
-const bot = new TelegramBot(TOKEN);
+app.use(cors({ origin: "*" }));
+app.use(express.json());
+
+const FILE = "./tracks.json";
 
 // -------------------
-// WEBHOOK ROUTE (ЭТОГО У ТЕБЯ НЕ ХВАТАЛО)
+// load/save
+// -------------------
+function loadTracks() {
+  try {
+    return JSON.parse(fs.readFileSync(FILE, "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+function saveTracks(data) {
+  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+}
+
+// -------------------
+// ping (проверка сервера)
+// -------------------
+app.get("/ping", (req, res) => {
+  res.send("pong");
+});
+
+// -------------------
+// получить треки
+// -------------------
+app.get("/tracks", (req, res) => {
+  res.json(loadTracks());
+});
+
+// -------------------
+// webhook (Telegram будет сюда слать)
 // -------------------
 app.post("/webhook", (req, res) => {
-  try {
-    console.log("🔥 webhook received");
+  console.log("🔥 webhook received:", req.body);
 
-    const update = req.body;
+  const tracks = loadTracks();
 
-    const msg = update.channel_post;
-    if (!msg) return res.sendStatus(200);
+  // пример: просто сохраняем всё что пришло
+  tracks.push(req.body);
 
-    const file = msg.audio || msg.document;
+  saveTracks(tracks);
 
-    if (!file) return res.sendStatus(200);
+  res.sendStatus(200);
+});
 
-    const tracks = loadTracks();
+// -------------------
+const PORT = process.env.PORT || 10000;
 
-    const track = {
-      title: file.title || "Без названия",
-      file_id: file.file_id,
-      duration: file.duration || 0,
-      date: msg.date
-    };
-
-    const exists = tracks.find(t => t.file_id === track.file_id);
-
-    if (!exists) {
-      tracks.push(track);
-      saveTracks(tracks);
-      console.log("➕ NEW TRACK:", track.title);
-    }
-
-    res.sendStatus(200);
-  } catch (e) {
-    console.log("WEBHOOK ERROR:", e);
-    res.sendStatus(200);
-  }
+app.listen(PORT, () => {
+  console.log("Server started on", PORT);
 });
