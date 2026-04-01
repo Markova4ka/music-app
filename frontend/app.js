@@ -2,20 +2,40 @@ let tracks = [];
 let currentTrack = 0;
 let audio = new Audio();
 
+await wakeServer();
+loadTracks();
+
+async function wakeServer() {
+  try {
+    await fetch("https://repo-1-exw5.onrender.com/ping");
+  } catch (e) {}
+  
+}
+
 async function loadTracks() {
-  const res = await fetch("https://repo-1-exw5.onrender.com/tracks");
-  tracks = await res.json();
+  const container = document.getElementById("tracks");
 
-  const list = document.querySelector(".list");
-  list.innerHTML = "";
+  container.innerHTML = "⏳ Загрузка...";
 
-  tracks.forEach((t, i) => {
-    const div = document.createElement("div");
-    div.className = "track";
-    div.innerText = `${i + 1}. ${t.title}`;
-    div.onclick = () => playTrack(i);
-    list.appendChild(div);
-  });
+  let tries = 0;
+
+  while (tries < 10) {
+    try {
+      const res = await fetch("https://repo-1-exw5.onrender.com/tracks");
+      const data = await res.json();
+
+      if (data && data.length >= 0) {
+        renderTracks(data);
+        return;
+      }
+
+    } catch (e) {}
+
+    tries++;
+    await new Promise(r => setTimeout(r, 2000));
+  }
+
+  container.innerHTML = "❌ Ошибка загрузки";
 }
 
 async function playTrack(index) {

@@ -28,22 +28,26 @@ syncChannel();
 
 // ловим новые посты
 bot.on("channel_post", async (msg) => {
-  if (!msg.audio) return;
+  if (msg.audio) {
+    const track = {
+      id: Date.now().toString(),
+      title: msg.audio.title || "Без названия",
+      file_id: msg.audio.file_id
+    };
 
-  const track = {
-  title: msg.audio.title || "Без названия",
-  author: msg.audio.performer || "Unknown",
-  file_id: msg.audio.file_id
-  };
+    try {
+      await fetch("https://repo-1-exw5.onrender.com/tracks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(track)
+      });
 
-  const existing = (await axios.get(API)).data;
+      console.log("✅ Трек добавлен");
 
-  if (exists(track.file_id, existing)) {
-    console.log("Дубликат пропущен");
-    return;
+    } catch (e) {
+      console.log("❌ Ошибка добавления");
+    }
   }
-
-  await axios.post(API, track);
-
-  console.log("Добавлен новый трек:", track.title);
 });

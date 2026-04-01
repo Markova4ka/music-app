@@ -53,6 +53,15 @@ app.get("/audio/:file_id", async (req, res) => {
   }
 });
 
+app.get("/ping", (req, res) => {
+  res.send("ok");
+});
+
+// пинг чтобы сервер не спал
+setInterval(() => {
+  console.log("ping...");
+}, 300000);
+
 app.listen(3000, () => {
   console.log("Server started");
 });
