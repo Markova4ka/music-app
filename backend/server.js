@@ -4,62 +4,52 @@ const fs = require("fs");
 
 const app = express();
 
-// 🔥 ВАЖНО: CORS (фикс твоей ошибки)
-app.use(cors({
-  origin: "*"
-}));
-
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// -------------------
-// 📌 ТВОИ ДАННЫЕ
-// -------------------
-let tracks = [];
+const FILE = "./tracks.json";
 
 // -------------------
-// 📌 PING (проверка сервера)
+// load/save
+// -------------------
+function loadTracks() {
+  try {
+    return JSON.parse(fs.readFileSync(FILE, "utf-8"));
+  } catch {
+    return [];
+  }
+}
+
+function saveTracks(data) {
+  fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+}
+
 // -------------------
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
 // -------------------
-// 📌 ПОЛУЧИТЬ ТРЕКИ
-// -------------------
 app.get("/tracks", (req, res) => {
-  res.json(tracks);
+  res.json(loadTracks());
 });
 
 // -------------------
-// 📌 ДОБАВИТЬ ТРЕК (из бота)
-// -------------------
 app.post("/addTrack", (req, res) => {
-  const track = req.body;
+  const tracks = loadTracks();
 
-  tracks.push(track);
+  tracks.push(req.body);
 
-  console.log("➕ Добавлен трек:", track);
+  saveTracks(tracks);
+
+  console.log("➕ track saved:", req.body);
 
   res.json({ ok: true });
 });
 
 // -------------------
-// 📌 ПОЛУЧИТЬ АУДИО (пример)
-// -------------------
-app.get("/audio/:file_id", (req, res) => {
-  const file_id = req.params.file_id;
-
-  // тут у тебя должна быть логика получения ссылки
-  res.json({
-    url: `https://example.com/audio/${file_id}.mp3`
-  });
-});
-
-// -------------------
-// 📌 СТАРТ СЕРВЕРА
-// -------------------
 const PORT = process.env.PORT || 10000;
 
 app.listen(PORT, () => {
-  console.log("Server started on port", PORT);
+  console.log("Server started on", PORT);
 });
