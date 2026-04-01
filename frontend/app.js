@@ -4,7 +4,6 @@ let audio = new Audio();
 
 const API = "https://music-app-gfga.onrender.com";
 
-// запуск
 start();
 
 async function start() {
@@ -12,13 +11,11 @@ async function start() {
   await loadTracks();
 }
 
-// 🔥 будим сервер (Render sleep fix)
+// 🔥 пробуждение сервера
 async function wakeServer() {
   try {
     await fetch(API + "/ping");
-  } catch (e) {
-    console.log("Ping error:", e);
-  }
+  } catch (e) {}
 }
 
 // 📥 загрузка треков
@@ -27,59 +24,69 @@ async function loadTracks() {
 
   container.innerHTML = "⏳ Загрузка...";
 
-  let tries = 0;
+  try {
+    const res = await fetch(API + "/tracks");
+    const data = await res.json();
 
-  while (tries < 10) {
-    try {
-      const res = await fetch(API + "/tracks");
-      const data = await res.json();
+    console.log("TRACKS:", data);
 
-      console.log("TRACKS:", data);
+    tracks = data || [];
+    renderTracks(tracks);
 
-      if (data) {
-        tracks = data;
-        renderTracks(data);
-        return;
-      }
-    } catch (e) {
-      console.log("Load error:", e);
-    }
-
-    tries++;
-    await new Promise(r => setTimeout(r, 2000));
+  } catch (e) {
+    console.log("LOAD ERROR:", e);
+    container.innerHTML = "❌ Ошибка загрузки";
   }
-
-  container.innerHTML = "❌ Ошибка загрузки";
 }
 
-// 🎧 проигрывание
+// 🎨 рендер списка
+function renderTracks(data) {
+  const container = document.getElementById("tracks");
+
+  container.innerHTML = "";
+
+  if (!data.length) {
+    container.innerHTML = "Нет треков 😢";
+    return;
+  }
+
+  data.forEach((track, index) => {
+    const div = document.createElement("div");
+
+    div.className = "track";
+    div.innerText = track.title || "Без названия";
+
+    div.onclick = () => playTrack(index);
+
+    container.appendChild(div);
+  });
+}
+
+// 🎧 play
 async function playTrack(index) {
-  console.log("▶️ PLAY", index);
-
   currentTrack = index;
-  const track = tracks[index];
 
+  const track = tracks[index];
   if (!track) return;
 
   try {
     const res = await fetch(API + "/audio/" + track.file_id);
     const data = await res.json();
 
-    console.log("AUDIO URL:", data);
-
     audio.src = data.url;
-
     await audio.play().catch(e => console.log("PLAY ERROR:", e));
 
-    document.getElementById("trackTitle").innerText = track.title || "Без названия";
+    document.getElementById("trackTitle").innerText =
+      track.title || "Без названия";
+
     document.getElementById("playBtn").innerText = "⏸️";
 
   } catch (e) {
-    console.log("Play error:", e);
+    console.log("PLAY ERROR:", e);
   }
 }
 
-// ⏯ пауза / плей
+// ⏯ toggle
 function togglePlay() {
   if (audio.paused) {
     audio.play();
@@ -90,38 +97,16 @@ function togglePlay() {
   }
 }
 
-// ⏭ следующий
+// ⏭ next
 function nextTrack() {
   if (!tracks.length) return;
-
   currentTrack = (currentTrack + 1) % tracks.length;
   playTrack(currentTrack);
 }
 
-// ⏮ предыдущий
+// ⏮ prev
 function prevTrack() {
   if (!tracks.length) return;
-
   currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
   playTrack(currentTrack);
-}
-
-// 📋 рендер списка
-function renderTracks(data) {
-  const container = document.getElementById("tracks");
-
-  container.innerHTML = "";
-
-  data.forEach((track, index) => {
-    const div = document.createElement("div");
-
-    div.innerText = track.title || "Без названия";
-    div.style.cursor = "pointer";
-    div.style.padding = "10px";
-    div.style.borderBottom = "1px solid #333";
-
-    div.onclick = () => playTrack(index);
-
-    container.appendChild(div);
-  });
 }
